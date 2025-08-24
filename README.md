@@ -1,4 +1,4 @@
-# Backend Assignmnet - Store And Solve Algebraic Equations
+# Backend Assignment - Store And Solve Algebraic Equations
 
 A **Spring Boot REST API** to **store and evaluate algebraic equations**.  
 Supports variables, parentheses, operator precedence, and exponentiation. 
