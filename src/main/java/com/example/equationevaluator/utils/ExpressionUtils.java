@@ -124,27 +124,54 @@ public class ExpressionUtils {
         return stack.pop();
     }
 
-    public static double evaluate(Node root, Map<String, Double> vars) {
-        if (root.left == null && root.right == null) {
-            String v = root.value;
-            if (vars != null && vars.containsKey(v)) return vars.get(v);
-            try { return Double.parseDouble(v); } catch (NumberFormatException e) { throw new IllegalArgumentException("Missing variable value for '" + v + "'"); }
+    public static double evaluate(Node node, Map<String, Double> variables) {
+        if (node == null) {
+            throw new IllegalArgumentException("Expression tree is empty.");
         }
-        double a = evaluate(root.left, vars);
-        double b = evaluate(root.right, vars);
-        return switch (root.value) {
-            case "+" -> a + b;
-            case "-" -> a - b;
-            case "*" -> a * b;
-            case "/" -> b == 0 ? Double.NaN : a / b;
-            case "^" -> Math.pow(a, b);
-            default -> throw new IllegalStateException("Unknown operator: " + root.value);
-        };
+
+        // If leaf node (number or variable)
+        if (node.left == null && node.right == null) {
+            // Number literal
+            if (node.value.matches("-?\\d+(\\.\\d+)?")) {
+                return Double.parseDouble(node.value);
+            }
+
+            // Variable
+            if (variables.containsKey(node.value)) {
+                return variables.get(node.value);
+            } else {
+                throw new IllegalArgumentException("Unknown variable: " + node.value);
+            }
+        }
+
+        // Operator node
+        double leftVal = evaluate(node.left, variables);
+        double rightVal = evaluate(node.right, variables);
+
+        switch (node.value) {
+            case "+": return leftVal + rightVal;
+            case "-": return leftVal - rightVal;
+            case "*": return leftVal * rightVal;
+            case "^":
+                return Math.pow(leftVal, rightVal);
+            case "/":
+                if (rightVal == 0) throw new ArithmeticException("Division by zero.");
+                return leftVal / rightVal;
+            default:
+                throw new IllegalArgumentException("Unsupported operator: " + node.value);
+        }
     }
+
 
     public static String toInfix(Node node) {
         if (node == null) return "";
         if (node.left == null && node.right == null) return node.value;
         return "(" + toInfix(node.left) + " " + node.value + " " + toInfix(node.right) + ")";
+    }
+
+    public static double evaluate(String expression) {
+        // Parse the expression into a Node
+        Node root = ExpressionParser.parse(expression);
+        return evaluate(root, new HashMap<>());
     }
 }

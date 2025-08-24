@@ -16,7 +16,7 @@ public class EquationController {
 
     private final EquationService service;
 
-    @PostMapping("/save")
+    @PostMapping("/store")
     public ResponseEntity<Map<String, String>> store(@RequestBody Equation dto) {
         String id = service.save(dto.getExpression());
         return ResponseEntity.ok(Map.of("id", id));
